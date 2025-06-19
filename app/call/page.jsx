@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import CallPopup from "@/components/CallPopup";
-import { connectStringeeClient } from "@/utils/stringee";
+import { StringeeClient, StringeeCall } from "stringee";
 
 function decodeJWT(token) {
   try {
@@ -37,7 +37,7 @@ export default function CallPage() {
 
   useEffect(() => {
     if (beToken) {
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/call/create-token`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/stringee/create-token`, {
         method: "POST",
         headers: { Authorization: `Bearer ${beToken}` },
       })
@@ -51,26 +51,34 @@ export default function CallPage() {
   }, [beToken]);
 
   useEffect(() => {
-    if (token && typeof window !== "undefined") {
-      const script = document.createElement("script");
-      script.src = "/libs/latest.sdk.bundle.min.js";
-      script.onload = () => {
-        const c = connectStringeeClient(
-          token,
-          (incomingCall) => {            
-            currentCallRef.current = incomingCall;
-            setIncomingCaller({
-              name: incomingCall.fromAlias || incomingCall.fromNumber,
-            });
-          },
-          (connected) => {
-            setIsConnected(connected);
-            setCallStatus(connected ? "Connected to Stringee" : "Disconnected");
-          }
-        );
-        setClient(c);
-      };
-      document.body.appendChild(script);
+    if (token) {
+      const stringeeClient = new StringeeClient();
+
+      stringeeClient.connect(token);
+
+      stringeeClient.on("connect", () => {
+        setIsConnected(true);
+        setCallStatus("Connected to Stringee");
+        console.log("Connected to Stringee");
+      });
+
+      stringeeClient.on("authen", (res) => {
+        console.log("Authen:", res);
+      });
+
+      stringeeClient.on("disconnect", () => {
+        setIsConnected(false);
+        setCallStatus("Disconnected from Stringee");
+      });
+
+      stringeeClient.on("incomingcall", (incomingCall) => {
+        currentCallRef.current = incomingCall;
+        setIncomingCaller({
+          name: incomingCall.fromAlias || incomingCall.fromNumber,
+        });
+      });
+
+      setClient(stringeeClient);
     }
   }, [token]);
 
@@ -115,9 +123,10 @@ export default function CallPage() {
 
   const makeCall = () => {
     if (!client || !isConnected || !userId.trim()) return;
+
     setCallStatus("Making call...");
 
-    const call = new window.StringeeCall(
+    const call = new StringeeCall(
       client,
       myIdRef.current,
       userId.trim(),
@@ -184,9 +193,7 @@ export default function CallPage() {
         <div>
           <span className="font-semibold">Trạng thái:</span>
           <span
-            className={`ml-2 font-bold ${
-              isConnected ? "text-green-600" : "text-red-600"
-            }`}
+            className={`ml-2 font-bold ${isConnected ? "text-green-600" : "text-red-600"}`}
           >
             {callStatus || "Chưa kết nối"}
           </span>

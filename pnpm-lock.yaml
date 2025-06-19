@@ -23,6 +23,9 @@ importers:
       stompjs:
         specifier: ^2.3.3
         version: 2.3.3
+      stringee:
+        specifier: ^2.9.3
+        version: 2.9.3
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
@@ -613,6 +616,9 @@ packages:
     resolution: {integrity: sha512-Mcc5wHehp9aXz1ax6bZUyY5afg9u2rv5cqQI3mRrYkGC8rW2hM02jWuwjtL++LS5qinSyhj2QfLyNsuc+VsExg==}
     engines: {node: '>=10.0.0'}
 
+  stringee@2.9.3:
+    resolution: {integrity: sha512-T4aV99MMOQMU4OoxGPMINVUCR6XgbLRr5IG49pbD2H+DMJ9oPBLC6EVJTv81BA/X2JaLnG55WtW5phM9eE4BPg==}
+
   styled-jsx@5.1.6:
     resolution: {integrity: sha512-qSVyDTeMotdvQYoHWLNGwRFJHC+i+ZvdBRYosOFgC+Wg1vx4frN2/RG/NA7SYqqvKNLf39P2LSRA2pu6n0XYZA==}
     engines: {node: '>= 12.0.0'}
@@ -1191,6 +1197,8 @@ snapshots:
       - supports-color
 
   streamsearch@1.1.0: {}
+
+  stringee@2.9.3: {}
 
   styled-jsx@5.1.6(react@19.1.0):
     dependencies:
