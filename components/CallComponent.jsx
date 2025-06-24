@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import {useEffect, useRef, useState} from "react";
+import {useSearchParams} from "next/navigation";
 import CallPopup from "@/components/CallPopup";
-import { connectStringeeClient } from "@/utils/stringee";
+import {connectStringeeClient} from "@/utils/stringee";
 import CallVideo from "@/components/CallVideo";
 
 // utils/jwt.ts
@@ -34,8 +34,12 @@ export default function CallComponent() {
     const currentCallRef = useRef(null);
     const callerRef = useRef("");
 
+    const [remoteStream, setRemoteStream] = useState(null);
+    const [localStream, setLocalStream] = useState(null);
+
+
     useEffect(() => {
-        if(beToken) {
+        if (beToken) {
             const payload = decodeJWT(beToken);
             if (payload?.sub) {
                 callerRef.current = payload.username;
@@ -47,7 +51,7 @@ export default function CallComponent() {
         if (beToken) {
             fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/stringee/create-token`, {
                 method: "POST",
-                headers: { Authorization: `Bearer ${beToken}` },
+                headers: {Authorization: `Bearer ${beToken}`},
             })
                 .then((res) => res.json())
                 .then((data) => setToken(data.body.token))
@@ -99,13 +103,11 @@ export default function CallComponent() {
 
     const setupCallEvents = (call) => {
         call.on("addremotestream", (stream) => {
-            const remoteVideo = document.getElementById("remoteVideo");
-            if (remoteVideo) remoteVideo.srcObject = stream;
+            setRemoteStream(stream);
         });
 
         call.on("addlocalstream", (stream) => {
-            const localVideo = document.getElementById("localVideo");
-            if (localVideo) localVideo.srcObject = stream;
+            setLocalStream(stream);
         });
 
         call.on("signalingstate", (state) => {
@@ -121,6 +123,7 @@ export default function CallComponent() {
         });
     };
 
+
     const makeCall = () => {
         if (!client || !isConnected || !callee.trim()) return;
         setCallStatus("Making call...");
@@ -130,7 +133,7 @@ export default function CallComponent() {
             callerRef.current,
             callee.trim(),
             true,
-            { isPeerToPeer: true }
+            {isPeerToPeer: true}
         );
 
         call.makeCall((res) => {
@@ -165,7 +168,7 @@ export default function CallComponent() {
 
             <div className="p-4 border rounded space-y-3">
                 <p className="text-sm text-gray-500">
-                    Caller (from): <strong>{callerRef.current}</strong> <br />
+                    Caller (from): <strong>{callerRef.current}</strong> <br/>
                     Callee (to): <strong>{callee}</strong>
                 </p>
                 <div>
@@ -210,7 +213,9 @@ export default function CallComponent() {
                 />
             )}
 
-            {(incomingCaller || currentCall) && <CallVideo />}
+            {(incomingCaller || currentCall) && (
+                <CallVideo localStream={localStream} remoteStream={remoteStream}/>
+            )}
         </div>
     );
 }
