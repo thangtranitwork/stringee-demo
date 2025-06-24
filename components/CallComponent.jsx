@@ -19,7 +19,7 @@ export function decodeJWT(token) {
 }
 
 
-export default function CallPage() {
+export default function CallComponent() {
     const searchParams = useSearchParams();
     const beToken = searchParams.get("beToken") || "";
     const callee = searchParams.get("toid") || "";
